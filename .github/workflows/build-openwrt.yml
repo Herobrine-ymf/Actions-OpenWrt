@@ -14,10 +14,10 @@ on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
-      usecache:
-        description: "Whether to use caching"
+      clean_cache:
+        description: "Clear caches"
         required: false
-        default: "true"
+        type: boolean
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -69,7 +69,6 @@ jobs:
 
       - name: toolchain cache
         uses: actions/cache@v2
-        if: (github.event.inputs.usecache == 'true' && github.event.inputs.usecache != 'false') || contains(github.event.action, 'usecache')
         with:
           path: |
             ${{ github.workspace }}/openwrt/staging_dir/host*
@@ -80,11 +79,17 @@ jobs:
 
       - name: ccache
         uses: actions/cache@v2
-        if: (github.event.inputs.usecache == 'true' && github.event.inputs.usecache != 'false') || contains(github.event.action, 'usecache')
         with:
           path: |
             ${{ github.workspace }}/openwrt/.ccache
           key: openwrt-ccache
+
+      - name: Clear caches
+        if: "${{ github.event.inputs.clean_cache == 'true' }}"
+        run: |
+          rm -rf openwrt/staging_dir
+          rm -rf openwrt/build_dir
+          rm -rf openwrt/.ccache
 
       - name: Before Update feeds
         run: |
