@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Initialization environment
         env:
@@ -69,7 +69,7 @@ jobs:
           echo "::set-output name=commitHash::$(git log --pretty=tformat:"%h" -n1 tools toolchain)"
 
       - name: toolchain cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ${{ github.workspace }}/openwrt/staging_dir/host*
@@ -79,7 +79,7 @@ jobs:
           key: openwrt-toolchain-${{ steps.getHash.outputs.commitHash }}
 
       - name: ccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ${{ github.workspace }}/openwrt/.ccache
@@ -160,7 +160,7 @@ jobs:
         run: df -hT
 
       - name: Upload bin directory
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
         with:
           name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
@@ -176,7 +176,7 @@ jobs:
           echo "::set-output name=status::success"
 
       - name: Upload firmware directory
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: steps.organize.outputs.status == 'success' && !cancelled()
         with:
           name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
@@ -221,13 +221,15 @@ jobs:
           files: ${{ env.FIRMWARE }}/*
 
       - name: Delete workflow runs
-        uses: GitRML/delete-workflow-runs@main
+        uses: Mattraks/delete-workflow-runs@v2
         with:
-          retain_days: 1
-          keep_minimum_runs: 3
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 2
 
       - name: Remove old Releases
-        uses: dev-drprasad/delete-older-releases@v0.1.0
+        uses: dev-drprasad/delete-older-releases@v0.2.0
         if: env.UPLOAD_RELEASE == 'true' && !cancelled()
         with:
           keep_latest: 3
