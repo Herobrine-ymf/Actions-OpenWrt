@@ -4,3 +4,4 @@
 #
 
 rm -rf feeds/luci/themes/luci-theme-argon
+rm -rf feeds/luci/themes/luci-theme-argon-mod
